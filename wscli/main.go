@@ -25,7 +25,7 @@ import (
 	"time"
 
 	"github.com/VictorLowther/simplexml/dom"
-	"github.com/VictorLowther/wsman"
+	"github.com/leslie-wang/wsman"
 )
 
 const (
@@ -107,7 +107,10 @@ func main() {
 		fmt.Printf("%v", flag.Args())
 		os.Exit(argError)
 	}
-	client := wsman.NewClient(Endpoint, Username, Password, useDigest)
+	client, err := wsman.NewClient(Endpoint, Username, Password, useDigest)
+	if err != nil {
+		log.Fatal(err)
+	}
 	client.Debug = debug
 	client.OptimizeEnum = optimizeEnum
 	client.Timeout = (time.Duration(timeout) * time.Second)

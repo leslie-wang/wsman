@@ -33,6 +33,7 @@ import (
 
 	"github.com/VictorLowther/simplexml/dom"
 	"github.com/VictorLowther/soap"
+	"github.com/pkg/errors"
 )
 
 type challenge struct {
@@ -173,7 +174,7 @@ type Client struct {
 // username or password are empty, we will not try to authenticate.
 // If useDigest is true, we will try to use digest auth instead of
 // basic auth.
-func NewClient(target, username, password string, useDigest bool) *Client {
+func NewClient(target, username, password string, useDigest bool) (*Client, error) {
 	res := &Client{
 		target:    target,
 		username:  username,
@@ -188,16 +189,16 @@ func NewClient(target, username, password string, useDigest bool) *Client {
 		res.challenge = &challenge{Username: res.username, Password: res.password}
 		resp, err := res.PostForm(res.target, nil)
 		if err != nil {
-			log.Fatalf("Unable to perform digest auth with %s: %v", res.target, err)
+			return nil, errors.Wrapf(err, "Unable to perform digest auth with %s", res.target)
 		}
 		if resp.StatusCode != 401 {
-			log.Fatalf("No digest auth at %s", res.target)
+			return nil, errors.Errorf("No digest auth at %s", res.target)
 		}
 		if err := res.challenge.parseChallenge(resp.Header.Get("WWW-Authenticate")); err != nil {
-			log.Fatalf("Failed to parse auth header %v", err)
+			return nil, errors.Wrap(err, "Failed to parse auth header")
 		}
 	}
-	return res
+	return res, nil
 }
 
 // Endpoint returns the endpoint that the Client will try to ocmmunicate with.
