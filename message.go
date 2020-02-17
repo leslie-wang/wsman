@@ -51,14 +51,10 @@ func (c *Client) NewMessage(action string) (msg *Message) {
 		Message: soap.NewMessage(),
 		client:  c,
 	}
-	id, err := uuid.NewV4()
-	if err != nil {
-		return nil
-	}
 	msg.SetHeader(
 		soap.MuElemC("Action", NS_WSA, action),
 		soap.MuElemC("To", NS_WSA, c.target),
-		soap.MuElemC("MessageID", NS_WSA, fmt.Sprintf("uuid:%s", id)),
+		soap.MuElemC("MessageID", NS_WSA, fmt.Sprintf("uuid:%s", uuid.NewV4())),
 		dom.Elem("ReplyTo", NS_WSA).AddChild(
 			soap.MuElemC("Address", NS_WSA,
 				"http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous")))
